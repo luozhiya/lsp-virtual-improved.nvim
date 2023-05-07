@@ -1,5 +1,7 @@
 ## lsp-virtual-improved
 
+## Config
+
 ```lua
 virtual_improved = {
   severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
@@ -10,3 +12,7 @@ virtual_improved = {
   code = false,
 },
 ```
+
+## Special Thanks
+https://todo.sr.ht/~whynothugo/lsp_lines.nvim
+neovim/runtime/lua/vim/diagnostic.lua
