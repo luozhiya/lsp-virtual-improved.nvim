@@ -13,5 +13,5 @@ virtual_improved = {
 ```
 
 ## Special Thanks
-https://todo.sr.ht/~whynothugo/lsp_lines.nvim
-neovim/runtime/lua/vim/diagnostic.lua
+- https://todo.sr.ht/~whynothugo/lsp_lines.nvim
+- neovim/runtime/lua/vim/diagnostic.lua
