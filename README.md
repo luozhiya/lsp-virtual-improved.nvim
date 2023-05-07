@@ -1,7 +1,6 @@
-## lsp-virtual-improved
+# lsp-virtual-improved
 
 ## Config
-
 ```lua
 virtual_improved = {
   severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
