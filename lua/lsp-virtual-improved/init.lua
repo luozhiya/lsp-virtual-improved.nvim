@@ -40,12 +40,11 @@ M.setup = function()
     group = _augroup('update_diagnostic_cache'),
     pattern = '*',
     callback = function(args)
+      -- FIXME: need deepcopy?
       render.diagnostic_cache = args.data.diagnostics
     end,
     desc = 'Update Diagnostic Cache',
   })
-  local augroup_name = 'LspVirtualImproved'
-  vim.api.nvim_create_augroup(augroup_name, { clear = true })
   vim.diagnostic.handlers.virtual_improved = {
     ---@param namespace number
     ---@param bufnr number
@@ -56,7 +55,6 @@ M.setup = function()
       if not ns.user_data.virt_improved_ns then
         ns.user_data.virt_improved_ns = vim.api.nvim_create_namespace('')
       end
-      vim.api.nvim_clear_autocmds({ group = augroup_name })
       opts = opts or {}
       if opts.virtual_improved then
         opts.virtual_improved.current_line = opts.virtual_improved.current_line or 'default'
@@ -66,7 +64,6 @@ M.setup = function()
             callback = function()
               filter_current_line(diagnostics, namespace, bufnr, opts)
             end,
-            group = augroup_name,
           })
           filter_current_line(diagnostics, namespace, bufnr, opts)
         else
@@ -80,7 +77,6 @@ M.setup = function()
       local ns = vim.diagnostic.get_namespace(namespace)
       if ns.user_data.virt_improved_ns then
         render.hide(ns.user_data.virt_improved_ns, bufnr)
-        vim.api.nvim_clear_autocmds({ group = augroup_name })
       end
     end,
   }
