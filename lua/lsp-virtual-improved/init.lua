@@ -2,13 +2,16 @@ local M = {}
 
 local render = require('lsp-virtual-improved.render')
 
-local function hide_current_line(diagnostics, ns, bufnr, opts)
+local function filter_current_line(diagnostics, ns, bufnr, opts)
   local show_diag = {}
   local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
   for _, diagnostic in pairs(diagnostics) do
-    local hide = diagnostic.end_lnum and (lnum >= diagnostic.lnum and lnum <= diagnostic.end_lnum)
+    local condition = diagnostic.end_lnum and (lnum >= diagnostic.lnum and lnum <= diagnostic.end_lnum)
       or (lnum == diagnostic.lnum)
-    if not hide then
+    if
+      (opts.virtual_improved.current_line == 'hide' and not condition)
+      or (opts.virtual_improved.current_line == 'only' and condition)
+    then
       table.insert(show_diag, diagnostic)
     end
   end
@@ -25,7 +28,7 @@ end
 ---@field prefix string|function|nil
 ---@field suffix string|function|nil
 ---@field format function|nil
----@field hide_current_line boolean Hide render for current line
+---@field current_line string|nil Render for current line
 
 -- Registers a wrapper-handler to render lsp virtual text.
 -- This should usually only be called once, during initialisation.
@@ -37,7 +40,6 @@ M.setup = function()
     group = _augroup('update_diagnostic_cache'),
     pattern = '*',
     callback = function(args)
-      -- FIXME: need deepcopy?
       render.diagnostic_cache = args.data.diagnostics
     end,
     desc = 'Update Diagnostic Cache',
@@ -54,19 +56,19 @@ M.setup = function()
       if not ns.user_data.virt_improved_ns then
         ns.user_data.virt_improved_ns = vim.api.nvim_create_namespace('')
       end
+      vim.api.nvim_clear_autocmds({ group = augroup_name })
       opts = opts or {}
       if opts.virtual_improved then
-        vim.api.nvim_clear_autocmds({ group = augroup_name })
-        if opts.virtual_improved.hide_current_line then
+        opts.virtual_improved.current_line = opts.virtual_improved.current_line or 'default'
+        if vim.tbl_contains({ 'only', 'hide' }, opts.virtual_improved.current_line) then
           vim.api.nvim_create_autocmd('CursorMoved', {
             buffer = bufnr,
             callback = function()
-              hide_current_line(diagnostics, namespace, bufnr, opts)
+              filter_current_line(diagnostics, namespace, bufnr, opts)
             end,
             group = augroup_name,
           })
-          -- Also hide diagnostics for the current line before the first CursorMoved event
-          hide_current_line(diagnostics, namespace, bufnr, opts)
+          filter_current_line(diagnostics, namespace, bufnr, opts)
         else
           render.show(namespace, bufnr, diagnostics, opts)
         end
