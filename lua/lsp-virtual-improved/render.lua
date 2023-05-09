@@ -119,7 +119,7 @@ local function get_virt_text_chunks(line_diags, opts)
   }
 
   opts = opts or {}
-  local prefix = opts.prefix or '■'
+  local prefix = opts.prefix or '●'
   local suffix = opts.suffix or ''
   local spacing = opts.spacing or 4
 
@@ -131,7 +131,7 @@ local function get_virt_text_chunks(line_diags, opts)
     if type(prefix) == 'function' then
       resolved_prefix = prefix(line_diags[i]) or ''
     end
-    table.insert(virt_texts, { resolved_prefix .. ' ', highlight_groups[line_diags[i].severity] })
+    table.insert(virt_texts, { resolved_prefix, highlight_groups[line_diags[i].severity] })
   end
 
   local diagnostic = line_diags[#line_diags]
