@@ -181,7 +181,6 @@ function M.show(namespace, bufnr, diagnostics, opts)
   end
 
   bufnr = get_bufnr(bufnr)
-  opts = opts or {}
 
   table.sort(diagnostics, function(a, b)
     if a.lnum ~= b.lnum then
