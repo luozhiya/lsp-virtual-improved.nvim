@@ -74,7 +74,7 @@ M.setup = function()
     ---@param bufnr number
     hide = function(namespace, bufnr)
       local ns = vim.diagnostic.get_namespace(namespace)
-      if ns.user_data.virt_improved_ns then
+      if ns.user_data.virt_improved_ns and vim.api.nvim_buf_is_valid(bufnr) then
         render.hide(ns.user_data.virt_improved_ns, bufnr)
       end
     end,
