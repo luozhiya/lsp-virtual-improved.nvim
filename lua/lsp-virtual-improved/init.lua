@@ -37,13 +37,13 @@ M.setup = function()
     group = _augroup('update_diagnostic_cache'),
     pattern = '*',
     callback = function(args)
+      -- FIXME: need deepcopy?
       render.diagnostic_cache = args.data.diagnostics
     end,
     desc = 'Update Diagnostic Cache',
   })
   local augroup_name = 'LspVirtualImproved'
   vim.api.nvim_create_augroup(augroup_name, { clear = true })
-  -- TODO: On LSP restart (e.g.: diagnostics cleared), errors don't go away.
   vim.diagnostic.handlers.virtual_improved = {
     ---@param namespace number
     ---@param bufnr number
@@ -54,19 +54,22 @@ M.setup = function()
       if not ns.user_data.virt_improved_ns then
         ns.user_data.virt_improved_ns = vim.api.nvim_create_namespace('')
       end
-      vim.api.nvim_clear_autocmds({ group = augroup_name })
-      if opts.virtual_improved.hide_current_line then
-        vim.api.nvim_create_autocmd('CursorMoved', {
-          buffer = bufnr,
-          callback = function()
-            hide_current_line(diagnostics, namespace, bufnr, opts)
-          end,
-          group = augroup_name,
-        })
-        -- Also hide diagnostics for the current line before the first CursorMoved event
-        hide_current_line(diagnostics, namespace, bufnr, opts)
-      else
-        render.show(namespace, bufnr, diagnostics, opts)
+      opts = opts or {}
+      if opts.virtual_improved then
+        vim.api.nvim_clear_autocmds({ group = augroup_name })
+        if opts.virtual_improved.hide_current_line then
+          vim.api.nvim_create_autocmd('CursorMoved', {
+            buffer = bufnr,
+            callback = function()
+              hide_current_line(diagnostics, namespace, bufnr, opts)
+            end,
+            group = augroup_name,
+          })
+          -- Also hide diagnostics for the current line before the first CursorMoved event
+          hide_current_line(diagnostics, namespace, bufnr, opts)
+        else
+          render.show(namespace, bufnr, diagnostics, opts)
+        end
       end
     end,
     ---@param namespace number

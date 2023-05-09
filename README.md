@@ -1,15 +1,35 @@
 # lsp-virtual-improved
 
+## Installation
+
+For example with lazy.nvim:
+
+```lua
+{
+  'luozhiya/lsp-virtual-improved.nvim'
+  event = { 'LspAttach' },
+  config = function()
+    require('lsp-virtual-improved').setup()
+  end,
+}
+```
+
 ## Config
 ```lua
-virtual_improved = {
-  severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
-  -- severity_limit = 'Error',
-  spacing = 4,
-  prefix = '●',
-  hide_current_line = true,
-  code = false,
-},
+local diagnostics = {
+  virtual_text = false, -- Disable builtin virtual text diagnostic.
+  virtual_improved = {
+    -- virtual_text options
+    -- severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
+    -- severity_limit = 'Error',
+    -- spacing = 4,
+    -- prefix = '●',
+    -- Extend options
+    current_line = 'default', -- 'only' current line, 'hide' current line, 'default' show all lines.
+    code = false, -- Show diagnostic code.
+  },
+}
+vim.diagnostic.config(diagnostics)
 ```
 
 ## Special Thanks
