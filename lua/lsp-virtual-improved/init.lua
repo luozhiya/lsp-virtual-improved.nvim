@@ -40,7 +40,6 @@ M.setup = function()
     group = _augroup('update_diagnostic_cache'),
     pattern = '*',
     callback = function(args)
-      -- FIXME: need deepcopy?
       render.diagnostic_cache = args.data.diagnostics
     end,
     desc = 'Update Diagnostic Cache',
@@ -62,7 +61,7 @@ M.setup = function()
           vim.api.nvim_create_autocmd('CursorMoved', {
             buffer = bufnr,
             callback = function()
-              filter_current_line(diagnostics, namespace, bufnr, opts)
+              filter_current_line(render.diagnostic_cache, namespace, bufnr, opts)
             end,
           })
           filter_current_line(diagnostics, namespace, bufnr, opts)
