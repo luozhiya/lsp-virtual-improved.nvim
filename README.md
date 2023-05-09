@@ -1,6 +1,6 @@
 # lsp-virtual-improved
 
-## Installation
+## 📦 Installation
 
 For example with lazy.nvim:
 
@@ -14,24 +14,49 @@ For example with lazy.nvim:
 }
 ```
 
-## Config
+## ⚙️ Configuration
+
+### Setup
+
+lsp-virtual-improved comes with the following defaults:
+
+```lua
+virtual_improved = {
+  severity = nil, -- Same usage as virtual_text.severity
+  spacing = 4, -- Same usage as virtual_text.spacing
+  prefix = '●', -- Same usage as virtual_text.prefix
+  suffix = '', -- Same usage as virtual_text.suffix
+  current_line = 'default', -- Current Line: 'only', 'hide', 'default'
+  code = nil, -- Show diagnostic code.
+},
+```
+
+Default different from virtual_text:
+- **prefix:** Change the prefix icon '■' -> '●'
+
+Current Line:
+- **only:** Show current line only when `CursorMoved` event triggered
+- **hide:** Hide current line when `CursorMoved` event triggered
+- **default:** Show all lines
+
+> 💡 if you want to show only current line, you can use the settings below
+
 ```lua
 local diagnostics = {
   virtual_text = false, -- Disable builtin virtual text diagnostic.
   virtual_improved = {
-    -- virtual_text options
-    -- severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
-    -- severity_limit = 'Error',
-    -- spacing = 4,
-    -- prefix = '●',
-    -- Extend options
-    current_line = 'default', -- 'only' current line, 'hide' current line, 'default' show all lines.
-    code = false, -- Show diagnostic code.
+    current_line = 'only',
   },
 }
 vim.diagnostic.config(diagnostics)
 ```
 
-## Special Thanks
+### Disable lsp-virtual-improved
+```lua
+virtual_improved = false
+```
+
+## 🎉 Special Thanks
 - https://todo.sr.ht/~whynothugo/lsp_lines.nvim
 - neovim/runtime/lua/vim/diagnostic.lua
+- https://github.com/folke/trouble.nvim
