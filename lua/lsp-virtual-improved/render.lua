@@ -10,6 +10,7 @@ M.severity = {
 local diagnostic_cache = {}
 
 ---@private
+---@param severity table|string
 local function to_severity(severity)
   if type(severity) == 'string' then
     return assert(M.severity[string.upper(severity)], string.format('Invalid severity: %s', severity))
@@ -18,6 +19,8 @@ local function to_severity(severity)
 end
 
 ---@private
+---@param severity table|string
+---@param diagnostics table
 local function filter_by_severity(severity, diagnostics)
   if not severity then
     return diagnostics
@@ -39,6 +42,7 @@ local function filter_by_severity(severity, diagnostics)
 end
 
 ---@private
+---@param bufnr number
 local function get_bufnr(bufnr)
   if not bufnr or bufnr == 0 then
     return vim.api.nvim_get_current_buf()
@@ -47,6 +51,7 @@ local function get_bufnr(bufnr)
 end
 
 ---@private
+---@param diagnostics table
 local function diagnostic_lines(diagnostics)
   if not diagnostics then
     return {}
@@ -64,6 +69,7 @@ local function diagnostic_lines(diagnostics)
 end
 
 ---@private
+---@param bufnr number
 local function count_sources(bufnr)
   local seen = {}
   local count = 0
@@ -79,6 +85,7 @@ local function count_sources(bufnr)
 end
 
 ---@private
+---@param diagnostics table
 local function prefix_source(diagnostics)
   return vim.tbl_map(function(d)
     if not d.source then
@@ -92,6 +99,8 @@ local function prefix_source(diagnostics)
 end
 
 ---@private
+---@param format function
+---@param diagnostics table
 local function reformat_diagnostics(format, diagnostics)
   vim.validate({
     format = { format, 'f' },
@@ -107,6 +116,8 @@ end
 
 --- Get virtual text chunks to display using |nvim_buf_set_extmark()|.
 ---@private
+---@param line_diags table
+---@param opts OptsVirtualImproved
 local function get_virt_text_chunks(line_diags, opts)
   if #line_diags == 0 then
     return nil
