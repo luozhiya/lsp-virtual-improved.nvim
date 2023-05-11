@@ -34,7 +34,8 @@ local function filter_by_severity(severity, diagnostics)
   end, diagnostics)
 end
 
-function M.get_bufnr(bufnr)
+---@private
+local function get_bufnr(bufnr)
   if not bufnr or bufnr == 0 then
     return vim.api.nvim_get_current_buf()
   end
@@ -179,7 +180,7 @@ function M.show(namespace, bufnr, diagnostics, opts)
     return
   end
 
-  bufnr = M.get_bufnr(bufnr)
+  bufnr = get_bufnr(bufnr)
 
   table.sort(diagnostics, function(a, b)
     if a.lnum ~= b.lnum then
@@ -221,6 +222,10 @@ end
 ---@param bufnr number
 function M.hide(namespace, bufnr)
   vim.api.nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
+end
+
+function M.update_diagnostic_cache(bufnr, diagnostics)
+  M.diagnostic_cache[get_bufnr(args.data.buffer)] = args.data.diagnostics
 end
 
 return M

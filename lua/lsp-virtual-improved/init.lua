@@ -39,14 +39,16 @@ M.setup = function()
   local _augroup = function(name)
     return vim.api.nvim_create_augroup('LspVirtualImproved_' .. name, { clear = true })
   end
+
   vim.api.nvim_create_autocmd('DiagnosticChanged', {
     group = _augroup('update_diagnostic_cache'),
     pattern = '*',
     callback = function(args)
-      render.diagnostic_cache[render.get_bufnr(args.data.buffer)] = args.data.diagnostics
+      render.update_diagnostic_cache(args.data.buffer, args.data.diagnostics)
     end,
     desc = 'Update Diagnostic Cache',
   })
+
   vim.diagnostic.handlers.virtual_improved = {
     ---@param namespace number
     ---@param bufnr number
@@ -73,6 +75,7 @@ M.setup = function()
         end
       end
     end,
+
     ---@param namespace number
     ---@param bufnr number
     hide = function(namespace, bufnr)
