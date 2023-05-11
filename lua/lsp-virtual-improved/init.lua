@@ -3,6 +3,9 @@ local M = {}
 local render = require('lsp-virtual-improved.render')
 
 local function filter_current_line(diagnostics, ns, bufnr, opts)
+  if not diagnostics then
+    return
+  end
   local show_diag = {}
   local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
   for _, diagnostic in pairs(diagnostics) do
@@ -40,7 +43,7 @@ M.setup = function()
     group = _augroup('update_diagnostic_cache'),
     pattern = '*',
     callback = function(args)
-      render.diagnostic_cache = args.data.diagnostics
+      render.diagnostic_cache[render.get_bufnr(args.data.buffer)] = args.data.diagnostics
     end,
     desc = 'Update Diagnostic Cache',
   })
@@ -61,7 +64,7 @@ M.setup = function()
           vim.api.nvim_create_autocmd('CursorMoved', {
             buffer = bufnr,
             callback = function()
-              filter_current_line(render.diagnostic_cache, namespace, bufnr, opts)
+              filter_current_line(render.diagnostic_cache[bufnr], namespace, bufnr, opts)
             end,
           })
           filter_current_line(diagnostics, namespace, bufnr, opts)
