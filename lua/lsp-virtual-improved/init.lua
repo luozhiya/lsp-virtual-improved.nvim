@@ -13,7 +13,7 @@ local render = require('lsp-virtual-improved.render')
 ---@field suffix string|function|nil
 ---@field format function|nil
 ---@field current_line string|nil Render for current line
----@field code boolean|string|nil
+---@field code boolean|nil
 
 -- Registers a wrapper-handler to render lsp virtual text.
 -- This should usually only be called once, during initialisation.
