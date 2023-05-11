@@ -7,6 +7,9 @@ M.severity = {
   HINT = 4,
 }
 
+local diagnostic_cache = {}
+
+---@private
 local function to_severity(severity)
   if type(severity) == 'string' then
     return assert(M.severity[string.upper(severity)], string.format('Invalid severity: %s', severity))
@@ -14,6 +17,7 @@ local function to_severity(severity)
   return severity
 end
 
+---@private
 local function filter_by_severity(severity, diagnostics)
   if not severity then
     return diagnostics
@@ -59,13 +63,11 @@ local function diagnostic_lines(diagnostics)
   return diagnostics_by_line
 end
 
-M.diagnostic_cache = {}
-
 ---@private
 local function count_sources(bufnr)
   local seen = {}
   local count = 0
-  for _, namespace_diagnostics in pairs(M.diagnostic_cache[bufnr]) do
+  for _, namespace_diagnostics in pairs(diagnostic_cache[bufnr]) do
     for _, diagnostic in ipairs(namespace_diagnostics) do
       if diagnostic.source and not seen[diagnostic.source] then
         seen[diagnostic.source] = true
@@ -104,7 +106,6 @@ local function reformat_diagnostics(format, diagnostics)
 end
 
 --- Get virtual text chunks to display using |nvim_buf_set_extmark()|.
----
 ---@private
 local function get_virt_text_chunks(line_diags, opts)
   if #line_diags == 0 then
@@ -154,6 +155,44 @@ local function get_virt_text_chunks(line_diags, opts)
 
     return virt_texts
   end
+end
+
+---@param bufnr number
+---@param diagnostics table
+function M.update_diagnostic_cache(bufnr, diagnostics)
+  diagnostic_cache[get_bufnr(bufnr)] = diagnostics
+end
+
+---@param namespace number
+---@param bufnr number
+---@param diagnostics table
+---@param opts boolean|Opts
+function M.filter_current_line(namespace, bufnr, diagnostics, opts)
+  if not diagnostics then
+    return
+  end
+  local show_diag = {}
+  local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+  for _, diagnostic in pairs(diagnostics) do
+    local condition = diagnostic.end_lnum and (lnum >= diagnostic.lnum and lnum <= diagnostic.end_lnum)
+      or (lnum == diagnostic.lnum)
+    if
+      (opts.virtual_improved.current_line == 'hide' and not condition)
+      or (opts.virtual_improved.current_line == 'only' and condition)
+    then
+      table.insert(show_diag, diagnostic)
+    end
+  end
+  M.show(namespace, bufnr, show_diag, opts)
+end
+
+---@param namespace number
+---@param bufnr number
+---@param opts boolean|Opts
+function M.filter_current_line_cached(namespace, bufnr, opts)
+  bufnr = get_bufnr(bufnr)
+  local diagnostics = diagnostic_cache[bufnr]
+  M.filter_current_line(namespace, bufnr, diagnostics, opts)
 end
 
 ---@param namespace number
@@ -222,10 +261,6 @@ end
 ---@param bufnr number
 function M.hide(namespace, bufnr)
   vim.api.nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
-end
-
-function M.update_diagnostic_cache(bufnr, diagnostics)
-  M.diagnostic_cache[get_bufnr(args.data.buffer)] = args.data.diagnostics
 end
 
 return M

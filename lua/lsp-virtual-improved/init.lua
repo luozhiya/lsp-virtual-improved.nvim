@@ -2,25 +2,6 @@ local M = {}
 
 local render = require('lsp-virtual-improved.render')
 
-local function filter_current_line(diagnostics, ns, bufnr, opts)
-  if not diagnostics then
-    return
-  end
-  local show_diag = {}
-  local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
-  for _, diagnostic in pairs(diagnostics) do
-    local condition = diagnostic.end_lnum and (lnum >= diagnostic.lnum and lnum <= diagnostic.end_lnum)
-      or (lnum == diagnostic.lnum)
-    if
-      (opts.virtual_improved.current_line == 'hide' and not condition)
-      or (opts.virtual_improved.current_line == 'only' and condition)
-    then
-      table.insert(show_diag, diagnostic)
-    end
-  end
-  render.show(ns, bufnr, show_diag, opts)
-end
-
 ---@class Opts
 ---@field virtual_improved OptsVirtualImproved Options for lsp-virtual-improved plugin
 
@@ -66,10 +47,10 @@ M.setup = function()
           vim.api.nvim_create_autocmd('CursorMoved', {
             buffer = bufnr,
             callback = function()
-              filter_current_line(render.diagnostic_cache[bufnr], namespace, bufnr, opts)
+              render.filter_current_line_cached(namespace, bufnr, opts)
             end,
           })
-          filter_current_line(diagnostics, namespace, bufnr, opts)
+          render.filter_current_line(namespace, bufnr, diagnostics, opts)
         else
           render.show(namespace, bufnr, diagnostics, opts)
         end
