@@ -42,16 +42,18 @@ function M.setup()
         ns.user_data.virt_improved_ns = vim.api.nvim_create_namespace('')
       end
       opts = opts or {}
-      render.update_diagnostic_cache(bufnr, diagnostics)
       if opts.virtual_improved then
         opts.virtual_improved.current_line = opts.virtual_improved.current_line or 'default'
         if vim.tbl_contains({ 'only', 'hide' }, opts.virtual_improved.current_line) then
-          vim.api.nvim_create_autocmd('CursorMoved', {
-            buffer = bufnr,
-            callback = function()
-              render.filter_current_line_cached(namespace, bufnr, opts)
-            end,
-          })
+          vim.api.nvim_create_autocmd(
+            { 'CursorMoved', 'CursorMovedI', 'CursorHold', 'CursorHoldI', 'User LspVirtualImproved_CacheUpdated' },
+            {
+              buffer = bufnr,
+              callback = function()
+                render.filter_current_line_cached(namespace, bufnr, opts)
+              end,
+            }
+          )
           render.filter_current_line(namespace, bufnr, diagnostics, opts)
         else
           render.show(namespace, bufnr, diagnostics, opts)

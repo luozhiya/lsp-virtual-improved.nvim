@@ -7,6 +7,16 @@ M.severity = {
   HINT = 4,
 }
 
+-- Diagnostic cache structure
+--[[]
+  [0] = {
+    { },
+    { }
+  },
+  [2] = {
+    { }
+  },
+]]
 local diagnostic_cache = {}
 
 ---@private
@@ -73,12 +83,10 @@ end
 local function count_sources(bufnr)
   local seen = {}
   local count = 0
-  for _, namespace_diagnostics in pairs(diagnostic_cache[bufnr]) do
-    for _, diagnostic in ipairs(namespace_diagnostics) do
-      if diagnostic.source and not seen[diagnostic.source] then
-        seen[diagnostic.source] = true
-        count = count + 1
-      end
+  for _, diagnostic in pairs(diagnostic_cache[bufnr]) do
+    if diagnostic.source and not seen[diagnostic.source] then
+      seen[diagnostic.source] = true
+      count = count + 1
     end
   end
   return count
@@ -171,7 +179,18 @@ end
 ---@param bufnr number
 ---@param diagnostics table
 function M.update_diagnostic_cache(bufnr, diagnostics)
-  diagnostic_cache[get_bufnr(bufnr)] = diagnostics
+  -- local x = {}
+  -- for _, v in pairs(diagnostics) do
+  --   local id = v['bufnr']
+  --   if x[id] == nil then
+  --     x[id] = {}
+  --   end
+  --   x[id] = vim.tbl_deep_extend('force', x[id], { v })
+  -- end
+  -- diagnostic_cache = vim.tbl_deep_extend('force', diagnostic_cache, x)
+  local v = get_bufnr(bufnr)
+  diagnostic_cache[v] = vim.diagnostic.get(v)
+  vim.api.nvim_exec_autocmds('User', { pattern = 'LspVirtualImproved_CacheUpdated', modeline = false })
 end
 
 ---@param namespace number
@@ -201,8 +220,8 @@ end
 ---@param bufnr number
 ---@param opts boolean|Opts
 function M.filter_current_line_cached(namespace, bufnr, opts)
-  bufnr = get_bufnr(bufnr)
-  local diagnostics = diagnostic_cache[bufnr]
+  -- local diagnostics = vim.diagnostic.get(get_bufnr(bufnr))
+  local diagnostics = diagnostic_cache[get_bufnr(bufnr)]
   M.filter_current_line(namespace, bufnr, diagnostics, opts)
 end
 
