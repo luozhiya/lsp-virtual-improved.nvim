@@ -42,6 +42,7 @@ function M.setup()
         ns.user_data.virt_improved_ns = vim.api.nvim_create_namespace('')
       end
       opts = opts or {}
+      render.update_diagnostic_cache(bufnr, diagnostics)
       if opts.virtual_improved then
         opts.virtual_improved.current_line = opts.virtual_improved.current_line or 'default'
         if vim.tbl_contains({ 'only', 'hide' }, opts.virtual_improved.current_line) then
