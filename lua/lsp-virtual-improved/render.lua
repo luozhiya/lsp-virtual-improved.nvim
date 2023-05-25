@@ -7,18 +7,6 @@ M.severity = {
   HINT = 4,
 }
 
--- Diagnostic cache structure
---[[]
-  [0] = {
-    { },
-    { }
-  },
-  [2] = {
-    { }
-  },
-]]
-local diagnostic_cache = {}
-
 ---@private
 ---@param severity table|string
 local function to_severity(severity)
@@ -52,15 +40,6 @@ local function filter_by_severity(severity, diagnostics)
 end
 
 ---@private
----@param bufnr number
-local function get_bufnr(bufnr)
-  if not bufnr or bufnr == 0 then
-    return vim.api.nvim_get_current_buf()
-  end
-  return bufnr
-end
-
----@private
 ---@param diagnostics table
 local function diagnostic_lines(diagnostics)
   if not diagnostics then
@@ -76,20 +55,6 @@ local function diagnostic_lines(diagnostics)
     table.insert(line_diagnostics, diagnostic)
   end
   return diagnostics_by_line
-end
-
----@private
----@param bufnr number
-local function count_sources(bufnr)
-  local seen = {}
-  local count = 0
-  for _, diagnostic in pairs(diagnostic_cache[bufnr]) do
-    if diagnostic.source and not seen[diagnostic.source] then
-      seen[diagnostic.source] = true
-      count = count + 1
-    end
-  end
-  return count
 end
 
 ---@private
@@ -176,23 +141,6 @@ local function get_virt_text_chunks(line_diags, opts)
   end
 end
 
----@param bufnr number
----@param diagnostics table
-function M.update_diagnostic_cache(bufnr, diagnostics)
-  -- local x = {}
-  -- for _, v in pairs(diagnostics) do
-  --   local id = v['bufnr']
-  --   if x[id] == nil then
-  --     x[id] = {}
-  --   end
-  --   x[id] = vim.tbl_deep_extend('force', x[id], { v })
-  -- end
-  -- diagnostic_cache = vim.tbl_deep_extend('force', diagnostic_cache, x)
-  local v = get_bufnr(bufnr)
-  diagnostic_cache[v] = vim.diagnostic.get(v)
-  vim.api.nvim_exec_autocmds('User', { pattern = 'LspVirtualImproved_CacheUpdated', modeline = false })
-end
-
 ---@param namespace number
 ---@param bufnr number
 ---@param diagnostics table
@@ -218,15 +166,6 @@ end
 
 ---@param namespace number
 ---@param bufnr number
----@param opts boolean|Opts
-function M.filter_current_line_cached(namespace, bufnr, opts)
-  -- local diagnostics = vim.diagnostic.get(get_bufnr(bufnr))
-  local diagnostics = diagnostic_cache[get_bufnr(bufnr)]
-  M.filter_current_line(namespace, bufnr, diagnostics, opts)
-end
-
----@param namespace number
----@param bufnr number
 ---@param diagnostics table
 ---@param opts boolean|Opts
 function M.show(namespace, bufnr, diagnostics, opts)
@@ -240,8 +179,6 @@ function M.show(namespace, bufnr, diagnostics, opts)
     },
     opts = { opts, 't', true },
   })
-
-  bufnr = get_bufnr(bufnr)
 
   local ns = vim.diagnostic.get_namespace(namespace)
   local virt_improved_ns = ns.user_data.virt_improved_ns
