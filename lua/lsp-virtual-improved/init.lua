@@ -44,7 +44,7 @@ function M.setup()
           vim.api.nvim_create_autocmd({ 'CursorHold', 'DiagnosticChanged' }, {
             buffer = bufnr,
             callback = function()
-              render.filter_current_line(namespace, bufnr, vim.diagnostic.get(bufnr), opts)
+              render.filter_current_line(namespace, bufnr, vim.diagnostic.get(bufnr, { namespace = namespace }), opts)
             end,
           })
           render.filter_current_line(namespace, bufnr, diagnostics, opts)
