@@ -36,7 +36,11 @@ function M.setup()
       local ns = vim.diagnostic.get_namespace(namespace)
       if not ns.user_data.virt_improved_ns then
         ns.user_data.virt_improved_ns = vim.api.nvim_create_namespace('')
+        ns.user_data.virt_improved_augroup =
+          vim.api.nvim_create_augroup('LspVirtImproved_' .. ns.user_data.virt_improved_ns, { clear = true })
       end
+      vim.api.nvim_clear_autocmds({ group = ns.user_data.virt_improved_augroup, buffer = bufnr })
+
       opts = opts or {}
       if opts.virtual_improved then
         opts.virtual_improved.current_line = opts.virtual_improved.current_line or 'default'
@@ -46,6 +50,7 @@ function M.setup()
             callback = function()
               render.filter_current_line(namespace, bufnr, vim.diagnostic.get(bufnr, { namespace = namespace }), opts)
             end,
+            group = ns.user_data.virt_improved_augroup,
           })
           render.filter_current_line(namespace, bufnr, diagnostics, opts)
         else
@@ -60,6 +65,7 @@ function M.setup()
       local ns = vim.diagnostic.get_namespace(namespace)
       if ns.user_data.virt_improved_ns and vim.api.nvim_buf_is_valid(bufnr) then
         render.hide(ns.user_data.virt_improved_ns, bufnr)
+        vim.api.nvim_clear_autocmds({ group = ns.user_data.virt_improved_augroup, buffer = bufnr })
       end
     end,
   }
