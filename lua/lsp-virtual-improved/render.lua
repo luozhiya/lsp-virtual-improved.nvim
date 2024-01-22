@@ -214,12 +214,13 @@ function M.show(namespace, bufnr, diagnostics, opts)
   end
 
   local buffer_line_diagnostics = diagnostic_lines(diagnostics)
+  local buf_line_count = vim.api.nvim_buf_line_count(bufnr)
   for line, line_diagnostics in pairs(buffer_line_diagnostics) do
     if severity then
       line_diagnostics = filter_by_severity(severity, line_diagnostics)
     end
     local virt_texts = get_virt_text_chunks(line_diagnostics, opts.virtual_improved)
-    if virt_texts then
+    if virt_texts and line < buf_line_count then
       vim.api.nvim_buf_set_extmark(bufnr, virt_improved_ns, line, 0, {
         hl_mode = 'combine',
         virt_text = virt_texts,
