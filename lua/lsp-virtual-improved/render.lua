@@ -180,6 +180,10 @@ function M.show(namespace, bufnr, diagnostics, opts)
     opts = { opts, 't', true },
   })
 
+  if not vim.api.nvim_buf_is_loaded(bufnr) then
+    return
+  end
+
   local ns = vim.diagnostic.get_namespace(namespace)
   local virt_improved_ns = ns.user_data.virt_improved_ns
   vim.api.nvim_buf_clear_namespace(bufnr, virt_improved_ns, 0, -1)
