@@ -6,7 +6,7 @@ For example with lazy.nvim:
 
 ```lua
 {
-  'luozhiya/lsp-virtual-improved.nvim'
+  'luozhiya/lsp-virtual-improved.nvim',
   event = { 'LspAttach' },
   config = function()
     require('lsp-virtual-improved').setup()
